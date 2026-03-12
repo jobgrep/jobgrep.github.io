@@ -347,14 +347,19 @@ const REC_SITE     = {name:"ReadyToTouch", domain:"readytotouch.com", code:"RT"}
 /* ── THEME ──────────────────────────────────────────────────────── */
 const metaTheme = document.getElementById('meta-theme');
 const themeBtn  = document.getElementById('theme-btn');
-let dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const savedTheme = localStorage.getItem('jg_theme');
+let dark = savedTheme !== null ? savedTheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   themeBtn.textContent = dark ? '◑ light' : '◐ dark';
   metaTheme.content = dark ? '#0f0e0c' : '#f5f2eb';
 }
 applyTheme();
-themeBtn.addEventListener('click', () => { dark = !dark; applyTheme(); });
+themeBtn.addEventListener('click', () => {
+  dark = !dark;
+  localStorage.setItem('jg_theme', dark ? 'dark' : 'light');
+  applyTheme();
+});
 
 /* ── DATALISTS ──────────────────────────────────────────────────── */
 function fillDL(id, arr) {
@@ -554,6 +559,7 @@ $('date-filter').addEventListener('click', e => {
   if (!b) return;
   document.querySelectorAll('#date-filter .date-btn').forEach(x => x.classList.remove('active'));
   b.classList.add('active');
+  if ($('results').children.length > 0) generate();
 });
 
 /* ── ACTIONS ────────────────────────────────────────────────────── */
