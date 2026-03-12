@@ -1,0 +1,103 @@
+Створи статичну HTML-сторінку (один файл, без CSS/JS фреймворків) — генератор Google site: запитів для пошуку вакансій. Назва сайту: jobgrep.
+
+ФОРМА:
+- Поле "Job Title" з <datalist> популярних dev-тайтлів
+- Поле "Location" з <datalist> популярних локацій
+- Поле "Extra Keywords" (необов'язкове, для довільних слів)
+- Чекбокс "Remote only"
+- Pill-кнопки фільтру дати: Any time / Past hour / Past 24h / Past week / Past month / Past year (реалізувати через Google параметр &tbs=qdr:X)
+- Кнопка "Generate Links" (також спрацьовує на Enter в будь-якому полі та Cmd/Ctrl+Enter глобально)
+- Кнопка "Clear" — скидає всі поля форми та результати одним кліком
+
+ЗБЕРЕЖЕННЯ СТАНУ В URL:
+- При кожному натисканні "Generate Links" поточний стан форми (title, location, keywords, remote, date filter) автоматично записується в query params (?t=...&l=...&k=...&r=1&d=qdr:w) через history.replaceState — без перезавантаження
+- При завантаженні сторінки стан відновлюється з query params і генерація запускається автоматично
+- Кнопка "Share Search" просто копіює поточний URL (який вже містить актуальний стан)
+
+ГЕНЕРАЦІЯ:
+Для кожного сайту зі списку будується Google-запит:
+  site:{domain} AND "{title}" AND "{location}" AND "remote"
+де remote і location додаються лише якщо заповнені/вибрані.
+URL: https://www.google.com/search?q={encoded_query}&tbs={tbs}
+
+РЕЗУЛЬТАТИ — картки, згруповані по секціях.
+Над усіма секціями заголовок з лічильником: "25 links generated".
+Кожна картка: іконка-абревіатура | назва сайту + preview запиту | кнопка "copy" (копіює запит) + кнопка "open →" (відкриває Google в новій вкладці) + кнопка "×" (приховати сайт).
+
+СПЕЦІАЛЬНА ГРУПА "⭐ Recommended":
+- Показується лише якщо в полі Job Title є одне з: Go, Golang, Rust, Elixir, Clojure, Scala, Erlang (case-insensitive, перевіряти входження)
+- Містить один сайт: { name: "ReadyToTouch", domain: "readytotouch.com", code: "RT" }
+- Відображається першою, перед ATS Platforms
+
+ПРИХОВУВАННЯ САЙТІВ:
+- Клік на "×" опускає картку в самий низ секції в окрему групу "Hidden", де вона відображається блідо зі скороченим виглядом і кнопкою "restore"
+- Список прихованих доменів зберігається в localStorage
+
+RECENTLY CLICKED:
+- Останні 5 сайтів, на які натиснули "open →", підсвічуються зеленим бордером і бейджем "recent"
+- Стан зберігається в localStorage, оновлюється одразу без перерендеру
+
+ТЕМА:
+- Перемикач Light/Dark, стартує з prefers-color-scheme системи
+- <meta name="theme-color"> оновлюється разом із темою (темний фон для dark, кремовий для light)
+
+СТИЛЬ: мінімалістичний, монохромний з червоним акцентом (#c0392b) і зеленим для recent/restore (#2c7a4b), моноширинний шрифт (Courier New), кремовий фон (#f5f2eb). Без зовнішніх шрифтів і бібліотек. SEO meta-теги включити.
+
+КОНФІГ САЙТІВ (вбудований у JS на початку скрипта як масив JSON-об'єктів):
+
+[
+  { "group": "ATS Platforms", "items": [
+    { "name": "Greenhouse",      "domain": "boards.greenhouse.io",     "code": "GH" },
+    { "name": "Lever",           "domain": "jobs.lever.co",            "code": "LV" },
+    { "name": "Workday",         "domain": "myworkdayjobs.com",        "code": "WD" },
+    { "name": "Ashby",           "domain": "jobs.ashbyhq.com",         "code": "AB" },
+    { "name": "Rippling",        "domain": "ats.rippling.com",         "code": "RP" },
+    { "name": "JazzHR",          "domain": "app.jazz.co",              "code": "JZ" },
+    { "name": "Personio",        "domain": "personio.de",              "code": "PS" },
+    { "name": "BambooHR",        "domain": "bamboohr.com",             "code": "BB" },
+    { "name": "Recruitee",       "domain": "recruitee.com",            "code": "RC" },
+    { "name": "SmartRecruiters", "domain": "jobs.smartrecruiters.com", "code": "SR" },
+    { "name": "Taleo",           "domain": "taleo.net",                "code": "TL" },
+    { "name": "iCIMS",           "domain": "icims.com",                "code": "IC" },
+    { "name": "Jobvite",         "domain": "jobs.jobvite.com",         "code": "JV" },
+    { "name": "Breezy HR",       "domain": "breezy.hr",                "code": "BZ" },
+    { "name": "Teamtailor",      "domain": "career.teamtailor.com",    "code": "TT" },
+    { "name": "Pinpoint",        "domain": "pinpointhq.com",           "code": "PP" },
+    { "name": "Workable",        "domain": "apply.workable.com",       "code": "WB" },
+    { "name": "Factorial",       "domain": "jobs.factorialhr.com",     "code": "FC" },
+    { "name": "Comeet",          "domain": "www.comeet.com",           "code": "CM" },
+    { "name": "Dover",           "domain": "jobs.dover.com",           "code": "DV" }
+  ]},
+  { "group": "Job Boards", "items": [
+    { "name": "LinkedIn",          "domain": "linkedin.com/jobs",                   "code": "IN" },
+    { "name": "Indeed",            "domain": "indeed.com",                          "code": "ID" },
+    { "name": "Glassdoor",         "domain": "glassdoor.com",                       "code": "GD" },
+    { "name": "Wellfound",         "domain": "wellfound.com",                       "code": "WF" },
+    { "name": "Y Combinator",      "domain": "workatastartup.com",                  "code": "YC" },
+    { "name": "Remotive",          "domain": "remotive.io",                         "code": "RV" },
+    { "name": "Remote OK",         "domain": "remoteok.com",                        "code": "RO" },
+    { "name": "We Work Remotely",  "domain": "weworkremotely.com",                  "code": "WR" },
+    { "name": "Himalayas",         "domain": "himalayas.app",                       "code": "HM" },
+    { "name": "Djinni",            "domain": "djinni.co",                           "code": "DJ" },
+    { "name": "DOU",               "domain": "jobs.dou.ua",                         "code": "DU" },
+    { "name": "EuroTech Jobs",     "domain": "eurotechjobs.com",                    "code": "ET" },
+    { "name": "Relocate.me",       "domain": "relocate.me",                         "code": "RL" },
+    { "name": "Otta",              "domain": "app.welcometothejungle.com/jobs",     "code": "OT" },
+    { "name": "HN Hiring",         "domain": "news.ycombinator.com",                "code": "HN" },
+    { "name": "Reddit Jobs",       "domain": "reddit.com/r/forhire",                "code": "RD" },
+    { "name": "Stack Overflow",    "domain": "stackoverflow.com/jobs",              "code": "SO" },
+    { "name": "GitHub Jobs",       "domain": "jobs.github.com",                     "code": "GJ" },
+    { "name": "Dice",              "domain": "dice.com",                            "code": "DC" },
+    { "name": "SimplyHired",       "domain": "simplyhired.com",                     "code": "SH" },
+    { "name": "Monster",           "domain": "monster.com",                         "code": "MN" },
+    { "name": "Jobicy",            "domain": "jobicy.com",                          "code": "JI" },
+    { "name": "NoDesk",            "domain": "nodesk.co",                           "code": "ND" },
+    { "name": "4 day week",        "domain": "4dayweek.io",                         "code": "4D" },
+    { "name": "Swissdevjobs",      "domain": "swissdevjobs.ch",                     "code": "SW" },
+    { "name": "Just Remote",       "domain": "justremote.co",                       "code": "JR" },
+    { "name": "Jobspresso",        "domain": "jobspresso.co",                       "code": "JP" },
+    { "name": "Working Nomads",    "domain": "workingnomads.com",                   "code": "WN" },
+    { "name": "Crypto Jobs List",  "domain": "cryptojobslist.com",                  "code": "CJ" },
+    { "name": "web3.career",       "domain": "web3.career",                         "code": "W3" }
+  ]}
+]
