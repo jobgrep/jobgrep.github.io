@@ -1,0 +1,99 @@
+Create a static HTML page (single file, no CSS/JS frameworks) — a Google site: search query generator for job hunters. Site name: jobgrep.
+
+FORM:
+- "Job Title" field with <datalist> of popular dev titles
+- "Location" field with <datalist> of popular locations
+- "Extra Keywords" field (optional, for arbitrary words)
+- "Remote only" checkbox
+- Date filter pill buttons: Any time / Past hour / Past 24h / Past week / Past month / Past year (implemented via Google parameter &tbs=qdr:X)
+- "Generate Links" button (also fires on Enter in any field and Cmd/Ctrl+Enter globally)
+- "Clear" button — resets all form fields and results in one click
+
+URL STATE PERSISTENCE:
+- On every "Generate Links" click, current form state (title, location, keywords, remote, date filter) is automatically written to query params (?t=...&l=...&k=...&r=1&d=qdr:w) via history.replaceState — no page reload
+- On page load, state is restored from query params and generation runs automatically
+- "Share Search" button simply copies the current URL (which already contains the current state)
+
+GENERATION:
+For each site in the list, a Google query is built:
+  site:{domain} AND "{title}" AND "{location}" AND "remote"
+where remote and location are included only if filled in / checked.
+URL: https://www.google.com/search?q={encoded_query}&tbs={tbs}
+
+RESULTS — cards grouped by sections.
+Above all sections, a header with a counter: "25 links generated".
+Each card: abbreviation icon | site name + query preview | "copy" button (copies query) + "open →" button (opens Google in new tab) + "×" button (hide site).
+
+SPECIAL GROUP "⭐ Recommended":
+- Shown only if the Job Title field contains one of: Go, Golang, Rust, Elixir, Clojure, Scala, Erlang (case-insensitive substring match)
+- Contains one site: { name: "ReadyToTouch", domain: "readytotouch.com", code: "RT" }
+- Displayed first, before ATS Platforms
+
+HIDING SITES:
+- Clicking "×" moves the card to the bottom of the results in a separate "Hidden" group, where it appears faded in a compact view with a "restore" button
+- The list of hidden domains is persisted in localStorage
+
+RECENTLY CLICKED:
+- The last 5 sites where "open →" was clicked are highlighted with a green border and a "recent" badge
+- State is persisted in localStorage and updated immediately without re-rendering
+
+THEME:
+- Light/Dark toggle, starts from the system prefers-color-scheme
+- <meta name="theme-color"> updates together with the theme (dark background for dark, cream for light)
+
+STYLE: minimalist, monochromatic with red accent (#c0392b) and green for recent/restore (#2c7a4b), monospace font (Courier New), cream background (#f5f2eb). No external fonts or libraries. Include SEO meta tags.
+
+SITE CONFIG (embedded in JS at the top of the script as an array of JSON objects):
+
+[
+  { "group": "ATS Platforms", "items": [
+    { "name": "Greenhouse",      "domain": "boards.greenhouse.io",     "code": "GH" },
+    { "name": "Lever",           "domain": "jobs.lever.co",            "code": "LV" },
+    { "name": "Workday",         "domain": "myworkdayjobs.com",        "code": "WD" },
+    { "name": "Ashby",           "domain": "jobs.ashbyhq.com",         "code": "AB" },
+    { "name": "Rippling",        "domain": "ats.rippling.com",         "code": "RP" },
+    { "name": "JazzHR",          "domain": "app.jazz.co",              "code": "JZ" },
+    { "name": "Personio",        "domain": "personio.de",              "code": "PS" },
+    { "name": "Recruitee",       "domain": "recruitee.com",            "code": "RC" },
+    { "name": "SmartRecruiters", "domain": "jobs.smartrecruiters.com", "code": "SR" },
+    { "name": "Taleo",           "domain": "taleo.net",                "code": "TL" },
+    { "name": "iCIMS",           "domain": "icims.com",                "code": "IC" },
+    { "name": "Jobvite",         "domain": "jobs.jobvite.com",         "code": "JV" },
+    { "name": "Breezy HR",       "domain": "breezy.hr",                "code": "BZ" },
+    { "name": "Teamtailor",      "domain": "career.teamtailor.com",    "code": "TT" },
+    { "name": "Pinpoint",        "domain": "pinpointhq.com",           "code": "PP" },
+    { "name": "Workable",        "domain": "apply.workable.com",       "code": "WB" },
+    { "name": "Comeet",          "domain": "www.comeet.com",           "code": "CM" },
+  ]},
+  { "group": "Job Boards", "items": [
+    { "name": "LinkedIn",          "domain": "linkedin.com/jobs",                   "code": "IN" },
+    { "name": "Indeed",            "domain": "indeed.com",                          "code": "ID" },
+    { "name": "Glassdoor",         "domain": "glassdoor.com",                       "code": "GD" },
+    { "name": "Wellfound",         "domain": "wellfound.com",                       "code": "WF" },
+    { "name": "Y Combinator",      "domain": "workatastartup.com",                  "code": "YC" },
+    { "name": "Remotive",          "domain": "remotive.io",                         "code": "RV" },
+    { "name": "Remote OK",         "domain": "remoteok.com",                        "code": "RO" },
+    { "name": "We Work Remotely",  "domain": "weworkremotely.com",                  "code": "WR" },
+    { "name": "Himalayas",         "domain": "himalayas.app",                       "code": "HM" },
+    { "name": "Djinni",            "domain": "djinni.co",                           "code": "DJ" },
+    { "name": "DOU",               "domain": "jobs.dou.ua",                         "code": "DU" },
+    { "name": "EuroTech Jobs",     "domain": "eurotechjobs.com",                    "code": "ET" },
+    { "name": "Relocate.me",       "domain": "relocate.me",                         "code": "RL" },
+    { "name": "Otta",              "domain": "app.welcometothejungle.com/jobs",     "code": "OT" },
+    { "name": "HN Hiring",         "domain": "news.ycombinator.com",                "code": "HN" },
+    { "name": "Reddit Jobs",       "domain": "reddit.com/r/forhire",                "code": "RD" },
+    { "name": "Stack Overflow",    "domain": "stackoverflow.com/jobs",              "code": "SO" },
+    { "name": "Dice",              "domain": "dice.com",                            "code": "DC" },
+    { "name": "SimplyHired",       "domain": "simplyhired.com",                     "code": "SH" },
+    { "name": "Monster",           "domain": "monster.com",                         "code": "MN" },
+    { "name": "Jobicy",            "domain": "jobicy.com",                          "code": "JI" },
+    { "name": "NoDesk",            "domain": "nodesk.co",                           "code": "ND" },
+    { "name": "4 day week",        "domain": "4dayweek.io",                         "code": "4D" },
+    { "name": "Swissdevjobs",      "domain": "swissdevjobs.ch",                     "code": "SW" },
+    { "name": "Just Remote",       "domain": "justremote.co",                       "code": "JR" },
+    { "name": "Jobspresso",        "domain": "jobspresso.co",                       "code": "JP" },
+    { "name": "Working Nomads",    "domain": "workingnomads.com",                   "code": "WN" },
+    { "name": "Crypto Jobs List",  "domain": "cryptojobslist.com",                  "code": "CJ" },
+    { "name": "web3.career",       "domain": "web3.career",                         "code": "W3" }
+  ]}
+]

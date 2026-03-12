@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>JobGrep — Google Job Search Query Generator</title>
+  <meta name="description" content="Generate precise Google site: search queries for job openings across LinkedIn, Greenhouse, Lever, and 50+ top job boards in one click. Find your next role faster." />
+  <meta name="keywords" content="job search, google dork, site search, job query generator, ATS search, LinkedIn jobs, remote jobs, developer jobs" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="JobGrep — Google Job Search Query Generator" />
+  <meta property="og:description" content="Skip the noise. Generate targeted Google search queries across all major ATS and job boards instantly." />
+  <meta property="og:type" content="website" />
+  <link rel="canonical" href="https://jobgrep.github.io/" />
+
+  <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+  <meta name="theme-color" content="#f5f2eb" id="meta-theme" />
+
+  <style>
+    :root {
+      --bg:      #f5f2eb;
+      --surf:    #edeae0;
+      --bdr:     #c8c4b7;
+      --txt:     #1a1814;
+      --muted:   #6b6760;
+      --red:     #c0392b;
+      --green:   #2c7a4b;
+      --gold:    #9a6e00;
+      --card:    #ffffff;
+      --shadow:  0 1px 4px rgba(0,0,0,.07);
+      --r:       5px;
+      --mono:    'Courier New','Lucida Console',monospace;
+      --serif:   Georgia,'Times New Roman',serif;
+      --t:       .17s ease;
+    }
+    [data-theme="dark"] {
+      --bg:      #0f0e0c;
+      --surf:    #1a1916;
+      --bdr:     #2e2c27;
+      --txt:     #e8e4d9;
+      --muted:   #7a7570;
+      --red:     #e05c4a;
+      --green:   #4caf7d;
+      --gold:    #c8a840;
+      --card:    #1c1b17;
+      --shadow:  0 1px 8px rgba(0,0,0,.4);
+    }
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--txt);font-family:var(--serif);font-size:16px;line-height:1.6;min-height:100vh;transition:background var(--t),color var(--t)}
+    a{color:inherit}
+
+    .wrap{max-width:800px;margin:0 auto;padding:0 20px}
+
+    /* HEADER */
+    header{padding:26px 0 18px;border-bottom:2px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .logo{font-family:var(--mono);font-size:1.5rem;font-weight:bold;letter-spacing:-1px;text-decoration:none;color:var(--txt)}
+    .logo span{color:var(--red)}
+    .tagline{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-top:2px}
+    #theme-btn{background:none;border:1.5px solid var(--bdr);border-radius:var(--r);padding:5px 11px;font-family:var(--mono);font-size:.72rem;color:var(--muted);cursor:pointer;transition:border-color var(--t),color var(--t);white-space:nowrap;flex-shrink:0}
+    #theme-btn:hover{border-color:var(--red);color:var(--red)}
+
+    /* FORM */
+    .form-section{margin-top:30px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+    @media(max-width:500px){.form-grid{grid-template-columns:1fr}}
+    .field{display:flex;flex-direction:column;gap:5px}
+    .field-full{grid-column:1/-1}
+    .lbl{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+    input[type="text"]{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:9px 12px;font-family:var(--mono);font-size:.9rem;color:var(--txt);outline:none;transition:border-color var(--t);width:100%}
+    input[type="text"]:focus{border-color:var(--red)}
+    input[type="text"]::placeholder{color:var(--muted);opacity:.65}
+    .remote-row{display:flex;align-items:center;gap:9px}
+    input[type="checkbox"]{width:16px;height:16px;accent-color:var(--red);cursor:pointer;flex-shrink:0}
+    .remote-row label{font-family:var(--mono);font-size:.86rem;color:var(--txt);cursor:pointer}
+
+    /* DATE PILLS */
+    .date-filter{display:flex;gap:5px;flex-wrap:wrap;margin-top:3px}
+    .date-btn{background:none;border:1.5px solid var(--bdr);border-radius:20px;padding:4px 11px;font-family:var(--mono);font-size:.7rem;color:var(--muted);cursor:pointer;transition:border-color var(--t),color var(--t),background var(--t);white-space:nowrap}
+    .date-btn:hover{border-color:var(--red);color:var(--red)}
+    .date-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+
+    /* ACTIONS */
+    .actions{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap;align-items:center}
+    .btn-primary{background:var(--red);color:#fff;border:none;border-radius:var(--r);padding:10px 22px;font-family:var(--mono);font-size:.86rem;font-weight:bold;cursor:pointer;letter-spacing:.03em;transition:opacity var(--t),transform var(--t)}
+    .btn-primary:hover{opacity:.84;transform:translateY(-1px)}
+    .btn-primary:active{transform:translateY(0)}
+    .btn-sec{background:none;border:1.5px solid var(--bdr);border-radius:var(--r);padding:8px 16px;font-family:var(--mono);font-size:.76rem;color:var(--muted);cursor:pointer;transition:border-color var(--t),color var(--t)}
+    .btn-sec:hover{border-color:var(--red);color:var(--red)}
+    .btn-clear:hover{border-color:var(--muted);color:var(--txt)}
+    .share-notice{font-family:var(--mono);font-size:.7rem;color:var(--green);opacity:0;transition:opacity .35s}
+    .share-notice.on{opacity:1}
+
+    /* RESULTS */
+    #results{margin-bottom:60px}
+    .results-hdr{display:flex;align-items:baseline;gap:10px;margin:30px 0 2px}
+    .results-lbl{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+    .results-count{font-family:var(--mono);font-size:.68rem;color:var(--red);font-weight:bold}
+
+    .group-lbl{font-family:var(--mono);font-size:.63rem;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);margin:18px 0 6px;display:flex;align-items:center;gap:8px}
+    .group-lbl::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+    .cards{display:flex;flex-direction:column;gap:5px}
+
+    .card{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:11px 13px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);transition:border-color var(--t),transform var(--t),opacity var(--t);animation:fadeUp .2s ease both}
+    .card:hover{border-color:var(--red);transform:translateX(2px)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+    .card--recent{border-color:var(--green)!important;background:color-mix(in srgb,var(--card) 93%,var(--green) 7%)}
+    .card--recent .c-icon{background:color-mix(in srgb,var(--surf) 60%,var(--green) 40%);color:var(--green)}
+
+    .card--recommended{border-color:var(--gold)!important;background:color-mix(in srgb,var(--card) 93%,var(--gold) 7%)}
+    .card--recommended .c-icon{background:color-mix(in srgb,var(--surf) 60%,var(--gold) 40%);color:var(--gold)}
+
+    .card--hidden{opacity:.38;animation:none}
+    .card--hidden:hover{opacity:.6;transform:none}
+
+    .c-icon{width:29px;height:29px;border-radius:4px;background:var(--surf);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.68rem;font-weight:bold;color:var(--muted);flex-shrink:0;letter-spacing:-.5px}
+    .c-body{flex:1;min-width:0}
+    .c-name{font-family:var(--mono);font-size:.83rem;font-weight:bold;color:var(--txt);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+    .c-query{font-family:var(--mono);font-size:.66rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+
+    .badge{display:inline-block;font-family:var(--mono);font-size:.57rem;border-radius:3px;padding:1px 4px;font-weight:normal}
+    .b-recent{color:var(--green);border:1px solid var(--green)}
+    .b-pick  {color:var(--gold); border:1px solid var(--gold)}
+
+    .c-actions{display:flex;gap:4px;flex-shrink:0;align-items:center}
+    .btn-open{background:var(--red);color:#fff;border:none;border-radius:4px;padding:5px 11px;font-family:var(--mono);font-size:.7rem;font-weight:bold;cursor:pointer;text-decoration:none;transition:opacity var(--t);white-space:nowrap;display:inline-block}
+    .btn-open:hover{opacity:.8}
+    .btn-copy{background:none;border:1.5px solid var(--bdr);border-radius:4px;padding:4px 8px;font-family:var(--mono);font-size:.7rem;color:var(--muted);cursor:pointer;transition:border-color var(--t),color var(--t);white-space:nowrap}
+    .btn-copy:hover{border-color:var(--green);color:var(--green)}
+    .btn-copy.ok{color:var(--green);border-color:var(--green)}
+    .btn-hide{background:none;border:none;font-family:var(--mono);font-size:.9rem;color:var(--bdr);cursor:pointer;padding:1px 3px;line-height:1;transition:color var(--t)}
+    .btn-hide:hover{color:var(--muted)}
+    .btn-restore{background:none;border:1.5px solid var(--bdr);border-radius:4px;padding:4px 8px;font-family:var(--mono);font-size:.68rem;color:var(--muted);cursor:pointer;transition:border-color var(--t),color var(--t);white-space:nowrap}
+    .btn-restore:hover{border-color:var(--green);color:var(--green)}
+
+    .empty{font-family:var(--mono);font-size:.8rem;color:var(--muted);margin-top:26px}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--bdr);padding:16px 0;text-align:center;font-family:var(--mono);font-size:.68rem;color:var(--muted);line-height:1.9}
+    footer a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+    footer a:hover{color:var(--red)}
+  </style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-96SZ208VD5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-96SZ208VD5');
+  </script>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <a href="/" class="logo">job<span>grep</span></a>
+      <div class="tagline">// google search query generator for job hunters</div>
+    </div>
+    <button id="theme-btn">◐ dark</button>
+  </header>
+
+  <section class="form-section">
+    <div class="form-grid">
+
+      <div class="field">
+        <div class="lbl">Job Title</div>
+        <input type="text" id="f-title" placeholder="e.g. Rust Developer" autocomplete="off" list="dl-titles" />
+        <datalist id="dl-titles"></datalist>
+      </div>
+
+      <div class="field">
+        <div class="lbl">Location</div>
+        <input type="text" id="f-loc" placeholder="e.g. Berlin" autocomplete="off" list="dl-locs" />
+        <datalist id="dl-locs"></datalist>
+      </div>
+
+      <div class="field field-full">
+        <div class="lbl">Extra Keywords <span style="opacity:.4;font-size:.62rem">(optional)</span></div>
+        <input type="text" id="f-kw" placeholder='"senior" OR "lead"' autocomplete="off" />
+      </div>
+
+      <div class="field field-full">
+        <div class="remote-row">
+          <input type="checkbox" id="f-remote" />
+          <label for="f-remote">Remote only</label>
+        </div>
+      </div>
+
+      <div class="field field-full">
+        <div class="lbl">Date Posted</div>
+        <div class="date-filter" id="date-filter">
+          <button class="date-btn active" data-tbs="">Any time</button>
+          <button class="date-btn" data-tbs="qdr:h">Past hour</button>
+          <button class="date-btn" data-tbs="qdr:d">Past 24 h</button>
+          <button class="date-btn" data-tbs="qdr:w">Past week</button>
+          <button class="date-btn" data-tbs="qdr:m">Past month</button>
+          <button class="date-btn" data-tbs="qdr:y">Past year</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" id="btn-gen">⚡ Generate Links</button>
+      <button class="btn-sec" id="btn-share">⬡ Share</button>
+      <button class="btn-sec btn-clear" id="btn-clear">✕ Clear</button>
+      <span class="share-notice" id="share-notice">Copied!</span>
+    </div>
+  </section>
+
+  <div id="results"></div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    jobgrep — find roles faster with targeted google dorks<br>
+    generated with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/jobgrep/jobgrep.github.io" target="_blank" rel="noopener">source on github ↗</a>
+  </div>
+</footer>
+
+<script>
+/* ── CONFIG ─────────────────────────────────────────────────────── */
+const TITLES = [
+  "Software Engineer","Senior Software Engineer","Staff Engineer","Principal Engineer",
+  "Frontend Engineer","Backend Engineer","Full Stack Engineer",
+  "React Developer","Vue Developer","Angular Developer","Next.js Developer",
+  "Node.js Developer","Python Developer","Go Developer","Golang Developer",
+  "Rust Developer","Java Developer","Kotlin Developer","Scala Developer",
+  "Elixir Developer","Erlang Developer","Clojure Developer","Haskell Developer",
+  "iOS Developer","Android Developer","Mobile Developer","Flutter Developer",
+  "DevOps Engineer","SRE","Platform Engineer","Cloud Engineer",
+  "AWS Engineer","GCP Engineer","Azure Engineer","Infrastructure Engineer",
+  "Data Engineer","Data Scientist","ML Engineer","Machine Learning Engineer",
+  "AI Engineer","LLM Engineer","Computer Vision Engineer",
+  "Security Engineer","AppSec Engineer","Penetration Tester",
+  "QA Engineer","SDET","Test Automation Engineer",
+  "Engineering Manager","CTO","VP Engineering","Tech Lead",
+  "Product Manager","UX Designer","UI Designer","Product Designer",
+  "Technical Writer","Solutions Architect","Blockchain Developer",
+  "Solidity Developer","Smart Contract Developer","Web3 Developer",
+];
+
+const LOCATIONS = [
+  "Remote","Worldwide",
+  "USA","United States","New York","San Francisco","Austin","Seattle","Boston",
+  "London","United Kingdom",
+  "Berlin","Germany","Munich","Hamburg",
+  "Amsterdam","Netherlands",
+  "Paris","France",
+  "Warsaw","Poland","Kraków","Wrocław",
+  "Prague","Czech Republic",
+  "Kyiv","Ukraine","Lviv",
+  "Lisbon","Portugal",
+  "Barcelona","Spain","Madrid",
+  "Stockholm","Sweden",
+  "Zurich","Switzerland",
+  "Vienna","Austria",
+  "Tallinn","Estonia",
+  "Vilnius","Lithuania",
+  "Budapest","Hungary",
+  "Canada","Toronto","Vancouver",
+  "Australia","Sydney","Melbourne",
+  "Singapore","Japan","Tokyo",
+  "EU","Europe",
+];
+
+const SITES = [
+  { group:"ATS Platforms", emoji:"🏢", items:[
+    {name:"Greenhouse",       domain:"boards.greenhouse.io",     code:"GH"},
+    {name:"Lever",            domain:"jobs.lever.co",            code:"LV"},
+    {name:"Workday",          domain:"myworkdayjobs.com",        code:"WD"},
+    {name:"Ashby",            domain:"jobs.ashbyhq.com",         code:"AB"},
+    {name:"Rippling",         domain:"ats.rippling.com",         code:"RP"},
+    {name:"JazzHR",           domain:"app.jazz.co",              code:"JZ"},
+    {name:"Personio",         domain:"personio.de",              code:"PS"},
+    {name:"Recruitee",        domain:"recruitee.com",            code:"RC"},
+    {name:"SmartRecruiters",  domain:"jobs.smartrecruiters.com", code:"SR"},
+    {name:"Taleo",            domain:"taleo.net",                code:"TL"},
+    {name:"iCIMS",            domain:"icims.com",                code:"IC"},
+    {name:"Jobvite",          domain:"jobs.jobvite.com",         code:"JV"},
+    {name:"Breezy HR",        domain:"breezy.hr",                code:"BZ"},
+    {name:"Teamtailor",       domain:"career.teamtailor.com",    code:"TT"},
+    {name:"Pinpoint",         domain:"pinpointhq.com",           code:"PP"},
+    {name:"Workable",         domain:"apply.workable.com",       code:"WB"},
+    {name:"Comeet",           domain:"www.comeet.com",           code:"CM"},
+  ]},
+  { group:"Job Boards", emoji:"🌐", items:[
+    {name:"LinkedIn",         domain:"linkedin.com/jobs",                   code:"IN"},
+    {name:"Indeed",           domain:"indeed.com",                          code:"ID"},
+    {name:"Glassdoor",        domain:"glassdoor.com",                       code:"GD"},
+    {name:"Wellfound",        domain:"wellfound.com",                       code:"WF"},
+    {name:"Y Combinator",     domain:"workatastartup.com",                  code:"YC"},
+    {name:"Remotive",         domain:"remotive.io",                         code:"RV"},
+    {name:"Remote OK",        domain:"remoteok.com",                        code:"RO"},
+    {name:"We Work Remotely", domain:"weworkremotely.com",                  code:"WR"},
+    {name:"Himalayas",        domain:"himalayas.app",                       code:"HM"},
+    {name:"Djinni",           domain:"djinni.co",                           code:"DJ"},
+    {name:"DOU",              domain:"jobs.dou.ua",                         code:"DU"},
+    {name:"EuroTech Jobs",    domain:"eurotechjobs.com",                    code:"ET"},
+    {name:"Relocate.me",      domain:"relocate.me",                         code:"RL"},
+    {name:"Otta",             domain:"app.welcometothejungle.com/jobs",     code:"OT"},
+    {name:"HN Hiring",        domain:"news.ycombinator.com",                code:"HN"},
+    {name:"Reddit Jobs",      domain:"reddit.com/r/forhire",                code:"RD"},
+    {name:"Stack Overflow",   domain:"stackoverflow.com/jobs",              code:"SO"},
+    {name:"Dice",             domain:"dice.com",                            code:"DC"},
+    {name:"SimplyHired",      domain:"simplyhired.com",                     code:"SH"},
+    {name:"Monster",          domain:"monster.com",                         code:"MN"},
+    {name:"Jobicy",           domain:"jobicy.com",                          code:"JI"},
+    {name:"NoDesk",           domain:"nodesk.co",                           code:"ND"},
+    {name:"4 day week",       domain:"4dayweek.io",                         code:"4D"},
+    {name:"Swissdevjobs",     domain:"swissdevjobs.ch",                     code:"SW"},
+    {name:"Just Remote",      domain:"justremote.co",                       code:"JR"},
+    {name:"Jobspresso",       domain:"jobspresso.co",                       code:"JP"},
+    {name:"Working Nomads",   domain:"workingnomads.com",                   code:"WN"},
+    {name:"Crypto Jobs List", domain:"cryptojobslist.com",                  code:"CJ"},
+    {name:"web3.career",      domain:"web3.career",                         code:"W3"},
+  ]},
+];
+
+const REC_TRIGGERS = ["go","golang","rust","elixir","clojure","scala","erlang"];
+const REC_SITE     = {name:"ReadyToTouch", domain:"readytotouch.com", code:"RT"};
+
+/* ── THEME ──────────────────────────────────────────────────────── */
+const metaTheme = document.getElementById('meta-theme');
+const themeBtn  = document.getElementById('theme-btn');
+let dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  themeBtn.textContent = dark ? '◑ light' : '◐ dark';
+  metaTheme.content = dark ? '#0f0e0c' : '#f5f2eb';
+}
+applyTheme();
+themeBtn.addEventListener('click', () => { dark = !dark; applyTheme(); });
+
+/* ── DATALISTS ──────────────────────────────────────────────────── */
+function fillDL(id, arr) {
+  const dl = document.getElementById(id);
+  arr.forEach(v => { const o = document.createElement('option'); o.value = v; dl.appendChild(o); });
+}
+fillDL('dl-titles', TITLES);
+fillDL('dl-locs',   LOCATIONS);
+
+/* ── LOCALSTORAGE ───────────────────────────────────────────────── */
+const LS_RECENT = 'jg_recent', LS_HIDDEN = 'jg_hidden', RECENT_MAX = 5;
+function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } }
+function lsSet(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+let recentClicked = lsGet(LS_RECENT);
+let hiddenDomains = lsGet(LS_HIDDEN);
+
+/* ── URL PARAMS ─────────────────────────────────────────────────── */
+function $(id) { return document.getElementById(id); }
+
+function getFormState() {
+  return {
+    t: $('f-title').value.trim(),
+    l: $('f-loc').value.trim(),
+    k: $('f-kw').value.trim(),
+    r: $('f-remote').checked,
+    d: document.querySelector('#date-filter .date-btn.active')?.dataset.tbs || '',
+  };
+}
+
+function writeParams() {
+  const s = getFormState();
+  const p = new URLSearchParams();
+  if (s.t) p.set('t', s.t);
+  if (s.l) p.set('l', s.l);
+  if (s.k) p.set('k', s.k);
+  if (s.r) p.set('r', '1');
+  if (s.d) p.set('d', s.d);
+  history.replaceState(null, '', p.toString() ? `?${p}` : location.pathname);
+}
+
+function restoreFromParams() {
+  const p = new URLSearchParams(location.search);
+  if (p.get('t')) $('f-title').value = p.get('t');
+  if (p.get('l')) $('f-loc').value   = p.get('l');
+  if (p.get('k')) $('f-kw').value    = p.get('k');
+  if (p.get('r') === '1') $('f-remote').checked = true;
+  if (p.get('d')) {
+    document.querySelectorAll('#date-filter .date-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tbs === p.get('d'));
+    });
+  }
+}
+
+/* ── QUERY BUILDER ──────────────────────────────────────────────── */
+function buildQuery(domain, title, loc, remote, kw) {
+  const p = [`site:${domain}`];
+  if (title)  p.push(`"${title}"`);
+  if (loc)    p.push(`"${loc}"`);
+  if (remote) p.push('"remote"');
+  if (kw)     p.push(`(${kw})`);
+  return p.join(' AND ');
+}
+function gURL(q, tbs) {
+  let u = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+  if (tbs) u += `&tbs=${encodeURIComponent(tbs)}`;
+  return u;
+}
+function isRecommended(title) {
+  const t = title.toLowerCase();
+  return REC_TRIGGERS.some(k => t.includes(k));
+}
+
+/* ── CARD BUILDER ───────────────────────────────────────────────── */
+function makeCard(site, title, loc, remote, kw, tbs, delay, isHidden) {
+  const q       = buildQuery(site.domain, title, loc, remote, kw);
+  const url     = gURL(q, tbs);
+  const isRec   = recentClicked.includes(site.domain);
+  const isPick  = site.domain === REC_SITE.domain;
+
+  const card = document.createElement('div');
+  let cls = 'card';
+  if (isHidden)      cls += ' card--hidden';
+  else if (isPick)   cls += ' card--recommended';
+  else if (isRec)    cls += ' card--recent';
+  card.className = cls;
+  if (!isHidden) card.style.animationDelay = `${delay * 22}ms`;
+
+  if (isHidden) {
+    card.innerHTML = `
+      <div class="c-icon">${site.code}</div>
+      <div class="c-body"><div class="c-name">${site.name}</div></div>
+      <div class="c-actions">
+        <button class="btn-restore">restore</button>
+      </div>`;
+    card.querySelector('.btn-restore').addEventListener('click', () => {
+      hiddenDomains = hiddenDomains.filter(d => d !== site.domain);
+      lsSet(LS_HIDDEN, hiddenDomains);
+      generate();
+    });
+  } else {
+    const badges = [
+      isRec  ? `<span class="badge b-recent">recent</span>` : '',
+      isPick ? `<span class="badge b-pick">pick</span>` : '',
+    ].join('');
+    card.innerHTML = `
+      <div class="c-icon">${site.code}</div>
+      <div class="c-body">
+        <div class="c-name">${site.name}${badges}</div>
+        <div class="c-query" title="${q}">${q}</div>
+      </div>
+      <div class="c-actions">
+        <button class="btn-copy" data-q="${encodeURIComponent(q)}">copy</button>
+        <a class="btn-open" href="${url}" target="_blank" rel="noopener" data-domain="${site.domain}">open →</a>
+        <button class="btn-hide" title="Hide">×</button>
+      </div>`;
+
+    card.querySelector('.btn-copy').addEventListener('click', function() {
+      navigator.clipboard.writeText(decodeURIComponent(this.dataset.q)).then(() => {
+        this.textContent = '✓'; this.classList.add('ok');
+        setTimeout(() => { this.textContent = 'copy'; this.classList.remove('ok'); }, 1500);
+      });
+    });
+    card.querySelector('.btn-open').addEventListener('click', function() {
+      const d = this.dataset.domain;
+      recentClicked = [d, ...recentClicked.filter(x => x !== d)].slice(0, RECENT_MAX);
+      lsSet(LS_RECENT, recentClicked);
+      if (!card.querySelector('.b-recent')) {
+        card.querySelector('.c-name').insertAdjacentHTML('beforeend', `<span class="badge b-recent">recent</span>`);
+      }
+      if (!isPick) card.className = 'card card--recent';
+    });
+    card.querySelector('.btn-hide').addEventListener('click', () => {
+      hiddenDomains = [...new Set([...hiddenDomains, site.domain])];
+      lsSet(LS_HIDDEN, hiddenDomains);
+      generate();
+    });
+  }
+  return card;
+}
+
+/* ── GENERATE ───────────────────────────────────────────────────── */
+function generate() {
+  const s       = getFormState();
+  const results = $('results');
+  writeParams();
+
+  if (!s.t && !s.l && !s.k) {
+    results.innerHTML = `<p class="empty">↑ Fill in at least one field to generate links.</p>`;
+    return;
+  }
+  results.innerHTML = '';
+
+  const groups = [];
+  if (isRecommended(s.t)) groups.push({group:'Recommended', emoji:'⭐', items:[REC_SITE]});
+  groups.push(...SITES);
+
+  let visibleCount = 0;
+  groups.forEach(g => g.items.forEach(i => { if (!hiddenDomains.includes(i.domain)) visibleCount++; }));
+
+  const hdr = document.createElement('div');
+  hdr.className = 'results-hdr';
+  hdr.innerHTML = `<span class="results-lbl">Results</span><span class="results-count">${visibleCount} links generated</span>`;
+  results.appendChild(hdr);
+
+  groups.forEach(group => {
+    const visible = group.items.filter(s => !hiddenDomains.includes(s.domain));
+    const hidden  = group.items.filter(s =>  hiddenDomains.includes(s.domain));
+
+    if (visible.length) {
+      const gl = document.createElement('div');
+      gl.className = 'group-lbl';
+      gl.textContent = `${group.emoji} ${group.group}`;
+      results.appendChild(gl);
+      const cs = document.createElement('div');
+      cs.className = 'cards';
+      visible.forEach((site, i) => cs.appendChild(makeCard(site, s.t, s.l, s.r, s.k, s.d, i, false)));
+      results.appendChild(cs);
+    }
+
+    if (hidden.length) {
+      const hl = document.createElement('div');
+      hl.className = 'group-lbl';
+      hl.style.opacity = '.4';
+      hl.textContent = `↓ hidden in ${group.group}`;
+      results.appendChild(hl);
+      const hs = document.createElement('div');
+      hs.className = 'cards';
+      hidden.forEach((site, i) => hs.appendChild(makeCard(site, s.t, s.l, s.r, s.k, s.d, i, true)));
+      results.appendChild(hs);
+    }
+  });
+}
+
+/* ── DATE FILTER ────────────────────────────────────────────────── */
+$('date-filter').addEventListener('click', e => {
+  const b = e.target.closest('.date-btn');
+  if (!b) return;
+  document.querySelectorAll('#date-filter .date-btn').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+});
+
+/* ── ACTIONS ────────────────────────────────────────────────────── */
+$('btn-gen').addEventListener('click', generate);
+['f-title','f-loc','f-kw'].forEach(id => {
+  $(id).addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) generate();
+});
+
+$('btn-clear').addEventListener('click', () => {
+  $('f-title').value = '';
+  $('f-loc').value   = '';
+  $('f-kw').value    = '';
+  $('f-remote').checked = false;
+  document.querySelectorAll('#date-filter .date-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+  $('results').innerHTML = '';
+  history.replaceState(null, '', location.pathname);
+});
+
+$('btn-share').addEventListener('click', () => {
+  writeParams();
+  navigator.clipboard.writeText(location.href).then(() => {
+    const n = $('share-notice');
+    n.classList.add('on');
+    setTimeout(() => n.classList.remove('on'), 2000);
+  });
+});
+
+/* ── INIT ───────────────────────────────────────────────────────── */
+restoreFromParams();
+const init = new URLSearchParams(location.search);
+if (init.get('t') || init.get('l') || init.get('k')) generate();
+</script>
+</body>
+</html>
